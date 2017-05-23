@@ -660,6 +660,23 @@ module.exports = config => {
     )
   }
 
+  ClientApi.prototype.setPrimaryEmail = function (sessionTokenHex, email, authPW) {
+    var o = sessionTokenHex ? tokens.SessionToken.fromHex(sessionTokenHex) : P.resolve(null)
+    return o.then(
+      function (token) {
+        return this.doRequest(
+          'POST',
+          this.baseURL + '/recovery_email/set_primary',
+          token,
+          {
+            email: email,
+            authPW: authPW
+          }
+        )
+      }.bind(this)
+    )
+  }
+
   ClientApi.prototype.sendUnblockCode = function (email) {
     return this.doRequest(
       'POST',

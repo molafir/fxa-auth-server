@@ -436,6 +436,10 @@ module.exports = config => {
     return this.api.deleteEmail(this.sessionToken, email)
   }
 
+  Client.prototype.setPrimaryEmail = function (email, authPW) {
+    return this.api.setPrimaryEmail(this.sessionToken, email, authPW)
+  }
+
   Client.prototype.sendUnblockCode = function (email) {
     return this.api.sendUnblockCode(email)
   }
