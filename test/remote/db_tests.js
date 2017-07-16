@@ -23,7 +23,8 @@ const lastAccessTimeUpdates = {
   sampleRate: 1
 }
 const Token = require('../../lib/tokens')(log, {
-  lastAccessTimeUpdates: lastAccessTimeUpdates
+  lastAccessTimeUpdates: lastAccessTimeUpdates,
+  tokenLifetimes: {}
 })
 const redisGetSpy = sinon.stub()
 const redisSetSpy = sinon.stub()
