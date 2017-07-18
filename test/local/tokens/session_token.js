@@ -13,8 +13,12 @@ const log = {
 }
 const crypto = require('crypto')
 
+const MAX_AGE_WITHOUT_DEVICE = 1000 * 60 * 60 * 24 * 7 * 4
 const config = {
-  lastAccessTimeUpdates: {}
+  lastAccessTimeUpdates: {},
+  tokenLifetimes: {
+    sessionTokenWithoutDevice: MAX_AGE_WITHOUT_DEVICE
+  }
 }
 const tokens = require('../../../lib/tokens/index')(log, config)
 const SessionToken = tokens.SessionToken
@@ -84,6 +88,53 @@ describe('SessionToken', () => {
         )
     }
   )
+
+  it('SessionToken.fromHex creates expired token if deviceId is null and createdAt is too old', () => {
+    return SessionToken.create(TOKEN)
+      .then(token => SessionToken.fromHex(token.data, {
+        createdAt: Date.now() - MAX_AGE_WITHOUT_DEVICE - 1,
+        deviceId: null
+      }))
+      .then(token => {
+        assert.equal(token.ttl(), 0)
+        assert.equal(token.expired(), true)
+      })
+  })
+
+  it('SessionToken.fromHex creates non-expired token if deviceId is null and createdAt is recent enough', () => {
+    return SessionToken.create(TOKEN)
+      .then(token => SessionToken.fromHex(token.data, {
+        createdAt: Date.now() - MAX_AGE_WITHOUT_DEVICE + 10000,
+        deviceId: null
+      }))
+      .then(token => {
+        assert.equal(token.ttl() > 0, true)
+        assert.equal(token.expired(), false)
+      })
+  })
+
+  it('SessionToken.fromHex creates non-expired token if deviceId is set and createdAt is too old', () => {
+    return SessionToken.create(TOKEN)
+      .then(token => SessionToken.fromHex(token.data, {
+        createdAt: Date.now() - MAX_AGE_WITHOUT_DEVICE - 1,
+        deviceId: crypto.randomBytes(16)
+      }))
+      .then(token => {
+        assert.equal(token.ttl() > 0, true)
+        assert.equal(token.expired(), false)
+      })
+  })
+
+  it('SessionToken.fromHex creates non-expired token if deviceId is missing and createdAt is too old', () => {
+    return SessionToken.create(TOKEN)
+      .then(token => SessionToken.fromHex(token.data, {
+        createdAt: Date.now() - MAX_AGE_WITHOUT_DEVICE - 1
+      }))
+      .then(token => {
+        assert.equal(token.ttl() > 0, true)
+        assert.equal(token.expired(), false)
+      })
+  })
 
   it(
     'create with NaN createdAt',

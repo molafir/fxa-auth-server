@@ -375,6 +375,12 @@ var conf = convict({
       format: 'duration',
       env: 'PASSWORD_CHANGE_TOKEN_TTL',
       default: '15 minutes'
+    },
+    sessionTokenWithoutDevice: {
+      doc: 'Maximum age for session tokens that aren\'t associated with a device record',
+      format: 'duration',
+      env: 'SESSION_TOKEN_WITHOUT_DEVICE_TTL',
+      default: '4 weeks'
     }
   },
   verifierVersion: {
